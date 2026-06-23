@@ -2,10 +2,11 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 void main(List<String> arguments) {
-  const String version = '1.0.0';
+  const String version = '0.5';
 
   if(arguments.isNotEmpty){
     for(int i=0; i<arguments.length; i++){
+
       if(arguments[i] == "-h" || arguments[i] == "--help"){
         printHelp();
 
@@ -14,21 +15,7 @@ void main(List<String> arguments) {
 
       }else if(arguments[i] == "search"){
         String textToSearch = '';
-
-        if(i == arguments.length-1){
-          while(textToSearch.isEmpty){
-            print("Missing terms to search. Please enter an article to search for: ");
-            textToSearch = stdin.readLineSync() ?? '';
-          }
-
-        }else{
-          final searchTermsSeparate = arguments.sublist(i+1);
-          textToSearch = searchTermsSeparate.join(" ");
-
-        }
-
-        searchWikipedia(textToSearch);
-
+        searchWikipedia(textToSearch, i, arguments);
         return;
         
       }else{
@@ -44,7 +31,19 @@ void main(List<String> arguments) {
   }
 }
 
-Future<void> searchWikipedia(String textToSearch) async {
+Future<void> searchWikipedia(String textToSearch, int i, List arguments) async {
+  if(i == arguments.length-1){
+    while(textToSearch.isEmpty){
+      print("Missing terms to search. Please enter an article to search for: ");
+      textToSearch = stdin.readLineSync() ?? '';
+    }
+
+  }else{
+    final searchTermsSeparate = arguments.sublist(i+1);
+    textToSearch = searchTermsSeparate.join(" ");
+
+  }
+
   print("Searching for '$textToSearch' on Wikipedia.");
 
   var articleContent = await getWikipediaArticle(textToSearch);
@@ -73,6 +72,6 @@ Future<String> getWikipediaArticle(String articleTitle) async {
   if(response.statusCode==200){
     return response.body;
   }else{
-    return "Error: failed to fetch article $articleTitle. Status code: ${response.statusCode}";
+    return "Error: failed to fetch article '$articleTitle'. Status code: ${response.statusCode}";
   }
 }
